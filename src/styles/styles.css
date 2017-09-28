@@ -12,3 +12,12 @@ body {
   margin-top: 50px;
   border-top: 1px solid #ddd;
 }
+
+.equip  {
+  margin-right: 10px;
+  font-size: 12px;
+}
+
+.table>tbody>tr>td {
+  vertical-align: middle;
+}
