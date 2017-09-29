@@ -8,9 +8,10 @@ class ContentPage extends React.Component {
 
         this.state = {
             rooms : [],
+            room : '',
             user : 'julien',
-            isOpen: false
-        }
+            isOpen: false,
+        };
         this.getRooms = this.getRooms.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
     }
@@ -19,11 +20,18 @@ class ContentPage extends React.Component {
         this.getRooms();
     }
 
-    toggleModal() {
+    openReservation(room) {
+
+    }
+
+    toggleModal(r) {
+        // const r = data;
+        // console.log(r);
         this.setState({
+            room: r,
             isOpen: !this.state.isOpen
         });
-    };
+    }
 
     getRooms() {
         let self = this;
@@ -40,25 +48,21 @@ class ContentPage extends React.Component {
         let listEquip = ({room}) => room.equipements.map(function (equip, index) {
            return (<span className="equip btn btn-primary" key={index}>{equip.name} </span>)
         });
-
         let listRooms = this.state.rooms.map(function (room, index) {
             return (
-                <tr key={index}>
+                <tr key={index} value={room} onClick={() => this.toggleModal(room)}>
                     <td> {room.name} </td>
                     <td> {room.description} </td>
                     <td>  {listEquip({room})} </td>
                     <td>  {room.capacity} </td>
                 </tr>
-            );}
+            );}.bind(this)
         );
 
         return (
             <div className="container">
                 <div className="row">
                     <h1>Content goes here !</h1>
-                    <button onClick={this.toggleModal}>
-                        Open the modal
-                    </button>
                         <div className="col-md-8">
                         <table className="table table-hover table-striped">
                             <thead className="thead-inverse">
@@ -77,8 +81,8 @@ class ContentPage extends React.Component {
                 </div>
                 <ReservationBox
                     show={this.state.isOpen}
+                    room={this.state.room}
                     onClose={this.toggleModal}>
-                        Contenu ici !
                 </ReservationBox>
             </div>
     );
