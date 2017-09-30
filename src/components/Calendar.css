@@ -1,0 +1,61 @@
+.container {
+    padding: 0 auto;
+    width: 80%;
+    height: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+
+#hCellFree {
+    background-color: lightgreen;
+    height: 100px;
+    width: 17%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: 1px;
+}
+
+#hCellBusy {
+    background-color: lightgray;
+    height: 100px;
+    width: 17%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: 1px;
+}
+
+#hcell:first-child{
+    margin-left: 0;
+}
+
+#mainRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height:500px;
+}
+
+.rowHours {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-top: 1px solid silver;
+    border-bottom: 1px solid silver;
+}
+
+.cellContent {
+    font-size: 20px;
+}
+
+.choose {
+    font-family: 'Lekton', sans-serif;
+    font-size: 20px;
+    margin: 0;
+}
