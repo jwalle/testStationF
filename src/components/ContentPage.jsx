@@ -9,6 +9,7 @@ class ContentPage extends React.Component {
         this.state = {
             rooms : [],
             room : '',
+            roomIndex: 0,
             user : 'julien',
             isOpen: false,
         };
@@ -24,11 +25,11 @@ class ContentPage extends React.Component {
 
     }
 
-    toggleModal(r) {
+    toggleModal(index) {
         // const r = data;
         // console.log(r);
         this.setState({
-            room: r,
+            roomIndex: index,
             isOpen: !this.state.isOpen
         });
     }
@@ -50,7 +51,7 @@ class ContentPage extends React.Component {
         });
         let listRooms = this.state.rooms.map(function (room, index) {
             return (
-                <tr key={index} value={room} onClick={() => this.toggleModal(room)}>
+                <tr key={index} value={room} onClick={() => this.toggleModal(index)}>
                     <td> {room.name} </td>
                     <td> {room.description} </td>
                     <td>  {listEquip({room})} </td>
@@ -63,7 +64,7 @@ class ContentPage extends React.Component {
             <div className="container">
                 <div className="row">
                     <h1>Content goes here !</h1>
-                        <div className="col-md-8">
+                        <div className="">
                         <table className="table table-hover table-striped">
                             <thead className="thead-inverse">
                             <tr>
@@ -82,6 +83,7 @@ class ContentPage extends React.Component {
                 <ReservationBox
                     show={this.state.isOpen}
                     room={this.state.room}
+                    roomIndex={this.state.roomIndex}
                     onClose={this.toggleModal}>
                 </ReservationBox>
             </div>

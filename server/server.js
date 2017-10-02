@@ -13,6 +13,7 @@ app.use(express.static(path.join( __dirname, '../public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 app.get('/getRooms', function (req, res) {
     fs.readFile('./rooms.json', function (err, data) {
         if (err) throw err;
@@ -20,12 +21,43 @@ app.get('/getRooms', function (req, res) {
     });
 });
 
-app.get('/getIsReserved/:room/:date', function (req, res) {
-    let room = req.params.room;
+app.get('/getIsReserved/:roomIndex/:date', function (req, res) {
+    let roomIndex = req.params.roomIndex;
     let time = req.params.date;
-    console.log(room, time);
-        res.send('false');
+    let data = JSON.parse(fs.readFileSync('./rooms.json', function (err, data) {
+        if (err) throw err;
+        return data;
+    }));
+    if (data.rooms[roomIndex]) {
+        res.send('false'); // if room is free
+    } else {
+        res.send('true'); //true
+    }
+});
+
+app.post('/setIsReserved', function (req, res) {
+    // get IS RESERVED
+    // console.log(req.body);
+    // return;
+    fs.readFile('database/reservation.json', 'utf8', function (err, data) {
+        if (err) throw err;
+        let obj;
+        if (!data)
+        {
+            obj = { reservation: [] }
+        } else {
+            obj = JSON.parse(data);
+        }
+            obj.reservation.push({
+                roomIndex: req.body.roomIndex,
+                time: req.body.date,
+                user: 'jwalle'
+            });
+            let json = JSON.stringify(obj);
+            fs.writeFileSync('database/reservation.json', json, 'utf8');
+        res.send('true');
     });
+});
     // let options = {
     //   url: 'http://online.stationf.co/tests/rooms.json',
     //   json: true

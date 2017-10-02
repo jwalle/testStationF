@@ -19,6 +19,10 @@
     margin-left: 1px;
 }
 
+#hCellFree:hover {
+    background-color: #16ee39;
+}
+
 #hCellBusy {
     background-color: lightgray;
     height: 100px;

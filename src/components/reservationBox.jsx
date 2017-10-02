@@ -21,9 +21,9 @@ class ReservationBox extends React.Component{
                             <h4 id={style.label}>Reservation de : {this.props.room.name}</h4>
 
                            <MyCalendar
-                                room = {this.props.room}/>
+                                roomIndex = {this.props.roomIndex}/>
                         </div>
-                    <button onClick={this.props.onClose}>
+                    <button onClick={this.props.onClose} className={style.closeBtn}>
                         Close
                     </button>
                 </div>

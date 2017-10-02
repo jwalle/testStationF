@@ -8,6 +8,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import 'react-datepicker/dist/react-datepicker-cssmodules.css';
 
 moment.locale('fr');
+const hours = [8, 10, 12, 14, 16, 18];
+
 
 class Calendar extends React.Component{
     constructor(props) {
@@ -17,42 +19,58 @@ class Calendar extends React.Component{
             startDate: moment(),
             selectedDate : moment(),
             currentHour : 0,
-            room : 'plop'
+            reserved : []
         };
         this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(date) {
-        this.setState({
-            startDate: date
-        });
-    }
+        let self = this;
+        let tmp = [];
+        this.setState({selectedDate: date});
+        hours.map(function(hour) {
+            let day = date.startOf('day');
+             self.getIsReserved(day.add(hour, 'h')).then(res => tmp.push(res));
+    });
+        this.setState({reserved: tmp});
+        console.log('couc', tmp);
+}
 
     getIsReserved(dateTime) {
-        // console.log(dateTime.format('X'));
-        console.log(this.props.params);
-         axios
-            .get('/getIsReserved/' + this.state.room + '/' + dateTime.format('X'))
-            .then(res => console.log(res))
-            .catch(err => console.log('get is reserved error : '  + err));
+         return axios
+                .get('/getIsReserved/' + this.props.roomIndex + '/' + dateTime.format('X'))
+                .then(res => {console.log(res.data) ;return res.data;})
+                .catch(err => console.log('get is reserved error : '  + err));
     }
 
     setIsReserved(dateTime) {
+        var config = {
+            withCredentials: true,
+            headers: {'content-type': 'application/json'}
+        };
         axios
-            .post('/setIsReserved' + dateTime)
+            .post('/setIsReserved', {
+                roomIndex: this.props.roomIndex,
+                date: dateTime.format('X')
+            }, config)
+            .then(res => console.log('success !' + res))
             .catch(err => console.log('set reserved error : '  + err));
     }
 
     setHour(e) {
-        this.setState({ currentHour : Number(e.target.key)})
+        this.setState({ currentHour : Number(e.target.key)});
+        console.log(this.state.currentHour);
     }
 
     render() {
-        const hours = [8, 10, 12, 14, 16, 18];
         var self = this;
+        var reserved = true;
         let listHours = hours.map(function(hour) {
-            var day = self.state.selectedDate.startOf('day');
-            if (self.getIsReserved(day.add(hour, 'h'))) {
+            let day = self.state.selectedDate.startOf('day');
+            self.getIsReserved(day.add(hour, 'h')).then(res => reserved = res);
+            console.log('KJLKJ', reserved);
+            //console.log('ALLLLL', self.state.reserved);
+            if (reserved === false) {
                 return (
                     <span className=""
                           id={style.hCellFree}
@@ -71,7 +89,7 @@ class Calendar extends React.Component{
                     </span>
             )
             }
-        });
+        }.bind(this));
 
         return (
             <div id={style.mainRow}>
@@ -93,7 +111,7 @@ class Calendar extends React.Component{
                     <span className="glyphicon glyphicon-arrow-down"> </span>
                     <button
                         className="btn btn-success"
-                        onClick={this.setIsReserved(this.state.selectedDate.add(this.state.currentHour, 'h'))}
+                        onClick={ () => this.setIsReserved(this.state.selectedDate.add(this.state.currentHour, 'h'))}
                     >Confirmation</button>
                 </div>
             </div>
