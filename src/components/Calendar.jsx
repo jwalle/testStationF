@@ -22,6 +22,10 @@ class Calendar extends React.Component{
             reserved : []
         };
         this.handleChange = this.handleChange.bind(this);
+        this.setHour = this.setHour.bind(this);
+    }
+    componentWillMount() {
+        this.handleChange(moment());
     }
 
     handleChange(date) {
@@ -30,10 +34,11 @@ class Calendar extends React.Component{
         this.setState({selectedDate: date});
         hours.map(function(hour) {
             let day = date.startOf('day');
-             self.getIsReserved(day.add(hour, 'h')).then(res => tmp.push(res));
+             self.getIsReserved(day.add(hour, 'h'))
+                 .then(res => {tmp[hour] = (res); return tmp;})
+                 .then(tmp => self.setState({reserved: tmp}))
+                 .catch(err => console.log('error handleChange : ', err));
     });
-        this.setState({reserved: tmp});
-        console.log('couc', tmp);
 }
 
     getIsReserved(dateTime) {
@@ -44,7 +49,7 @@ class Calendar extends React.Component{
     }
 
     setIsReserved(dateTime) {
-        var config = {
+        let config = {
             withCredentials: true,
             headers: {'content-type': 'application/json'}
         };
@@ -57,39 +62,35 @@ class Calendar extends React.Component{
             .catch(err => console.log('set reserved error : '  + err));
     }
 
-    setHour(e) {
-        this.setState({ currentHour : Number(e.target.key)});
-        console.log(this.state.currentHour);
+    setHour(hour) {
+        this.setState({currentHour: hour});
     }
 
     render() {
-        var self = this;
-        var reserved = true;
+        let self = this;
+        let thisStyle;
         let listHours = hours.map(function(hour) {
             let day = self.state.selectedDate.startOf('day');
-            self.getIsReserved(day.add(hour, 'h')).then(res => reserved = res);
-            console.log('KJLKJ', reserved);
-            //console.log('ALLLLL', self.state.reserved);
-            if (reserved === false) {
-                return (
-                    <span className=""
-                          id={style.hCellFree}
-                          key={hour}
-                          onClick={self.setHour}
-                    >
-                        <p className={style.cellContent}>{hour + 'h00'}</p>
-                        <p>Salle libre</p>
-                    </span>
-                );
-                } else {
-                return (
-                    <span className="" id={style.hCellBusy} key={hour}>
-                        <p className={style.cellContent}>{hour + 'h00'}</p>
-                        <p>Salle occupe</p>
-                    </span>
-            )
+            let state = self.state.reserved[hour];
+            console.log(self.state.currentHour, hour);
+            if (state == false) {
+                thisStyle = style.hCellFree;
+            } else {
+                thisStyle = style.hCellBusy;
             }
-        }.bind(this));
+            if(self.state.currentHour == hour) {
+                thisStyle = style.hCellSelected;
+            }
+            return (
+                <span className=''
+                      id={thisStyle}
+                      key={hour}
+                      onClick={() => self.setHour(hour)}>
+                    <p className={style.cellContent}>{hour + 'h00'}</p>
+                    {state == false ? <p>Salle libre</p> : <p>Salle occupe</p>}
+                </span>
+            );
+        });
 
         return (
             <div id={style.mainRow}>
@@ -102,11 +103,11 @@ class Calendar extends React.Component{
                                 minDate={moment()}
                                 placeholderText="choose a date"
                     />
-
                     <p className={style.choose}>Choix de l'horaire</p>
                     <span className="glyphicon glyphicon-arrow-down"> </span>
                     <div className={style.rowHours}>
                         {listHours}
+                        {console.log('PLOP2')}
                     </div>
                     <span className="glyphicon glyphicon-arrow-down"> </span>
                     <button

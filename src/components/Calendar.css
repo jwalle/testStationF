@@ -23,6 +23,22 @@
     background-color: #16ee39;
 }
 
+#hCellFree:active {
+    background-color: #10eec8;
+}
+
+#hCellSelected {
+    background-color: #3d54ee;
+    height: 100px;
+    width: 17%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: 1px;
+}
+
+
 #hCellBusy {
     background-color: lightgray;
     height: 100px;

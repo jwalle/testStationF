@@ -21,24 +21,48 @@ app.get('/getRooms', function (req, res) {
     });
 });
 
-app.get('/getIsReserved/:roomIndex/:date', function (req, res) {
-    let roomIndex = req.params.roomIndex;
-    let time = req.params.date;
-    let data = JSON.parse(fs.readFileSync('./rooms.json', function (err, data) {
+function getRooms() {
+    return JSON.parse(fs.readFileSync('./rooms.json', function (err, data) {
         if (err) throw err;
         return data;
     }));
-    if (data.rooms[roomIndex]) {
-        res.send('false'); // if room is free
-    } else {
-        res.send('true'); //true
+}
+
+function getReservation() {
+    return JSON.parse(fs.readFileSync('database/reservation.json', function (err, data) {
+        if (err) throw err;
+        return data;
+    })).reservation;
+}
+
+function isReserved(roomIndex, time) {
+    let rooms = getRooms();
+    let rsvts = getReservation();
+
+    if (rooms.rooms[roomIndex]) {
+        for (let key in rsvts) {
+            if (rsvts.hasOwnProperty(key)) {
+                let val = rsvts[key];
+                if (val.roomIndex == roomIndex) {
+                    if (val.time == time) {
+                        return('true');
+                    }
+                }
+            }
+        }
     }
+    return('false');
+}
+
+app.get('/getIsReserved/:roomIndex/:date', function (req, res) {
+    let roomIndex = req.params.roomIndex;
+    let time = req.params.date;
+    res.send(isReserved(roomIndex, time));
 });
 
 app.post('/setIsReserved', function (req, res) {
-    // get IS RESERVED
-    // console.log(req.body);
-    // return;
+    if (isReserved(req.body.roomIndex, req.body.date) == 'true')
+        return ;
     fs.readFile('database/reservation.json', 'utf8', function (err, data) {
         if (err) throw err;
         let obj;
