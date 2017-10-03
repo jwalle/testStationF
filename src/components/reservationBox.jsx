@@ -1,6 +1,5 @@
 import React from 'react';
 import style from './reservationBox.css';
-import Datetime from 'react-datetime';
 import MyCalendar from './Calendar.jsx'
 
 
@@ -21,6 +20,7 @@ class ReservationBox extends React.Component{
                             <h4 id={style.label}>Reservation de : {this.props.room.name}</h4>
 
                            <MyCalendar
+                                onClose = {this.props.onClose}
                                 roomIndex = {this.props.roomIndex}/>
                         </div>
                     <button onClick={this.props.onClose} className={style.closeBtn}>

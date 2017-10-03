@@ -66,6 +66,11 @@ class Calendar extends React.Component{
         this.setState({currentHour: hour});
     }
 
+    makeReservation() {
+        this.setIsReserved(this.state.selectedDate.add(this.state.currentHour, 'h'));
+        this.props.onClose();
+    }
+
     render() {
         let self = this;
         let thisStyle;
@@ -75,17 +80,17 @@ class Calendar extends React.Component{
             console.log(self.state.currentHour, hour);
             if (state == false) {
                 thisStyle = style.hCellFree;
+                if(self.state.currentHour == hour) {
+                    thisStyle = style.hCellSelected;
+                }
             } else {
                 thisStyle = style.hCellBusy;
-            }
-            if(self.state.currentHour == hour) {
-                thisStyle = style.hCellSelected;
             }
             return (
                 <span className=''
                       id={thisStyle}
                       key={hour}
-                      onClick={() => self.setHour(hour)}>
+                      onClick={state == false ? (() => self.setHour(hour)) : ('')}>
                     <p className={style.cellContent}>{hour + 'h00'}</p>
                     {state == false ? <p>Salle libre</p> : <p>Salle occupe</p>}
                 </span>
@@ -112,7 +117,7 @@ class Calendar extends React.Component{
                     <span className="glyphicon glyphicon-arrow-down"> </span>
                     <button
                         className="btn btn-success"
-                        onClick={ () => this.setIsReserved(this.state.selectedDate.add(this.state.currentHour, 'h'))}
+                        onClick={ () => this.makeReservation()}
                     >Confirmation</button>
                 </div>
             </div>

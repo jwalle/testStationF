@@ -3,6 +3,7 @@ const path = require('path');
 const request = require('request');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const moment = require('moment');
 
 /* eslint-disable no-console */
 
@@ -38,13 +39,14 @@ function getReservation() {
 function isReserved(roomIndex, time) {
     let rooms = getRooms();
     let rsvts = getReservation();
+    let cTime = moment().format('X');
 
     if (rooms.rooms[roomIndex]) {
         for (let key in rsvts) {
             if (rsvts.hasOwnProperty(key)) {
                 let val = rsvts[key];
                 if (val.roomIndex == roomIndex) {
-                    if (val.time == time) {
+                    if (val.time == time || time < cTime) {
                         return('true');
                     }
                 }

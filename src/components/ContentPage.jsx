@@ -25,11 +25,12 @@ class ContentPage extends React.Component {
 
     }
 
-    toggleModal(index) {
+    toggleModal(index, room) {
         // const r = data;
         // console.log(r);
         this.setState({
             roomIndex: index,
+            room: room,
             isOpen: !this.state.isOpen
         });
     }
@@ -51,7 +52,7 @@ class ContentPage extends React.Component {
         });
         let listRooms = this.state.rooms.map(function (room, index) {
             return (
-                <tr key={index} value={room} onClick={() => this.toggleModal(index)}>
+                <tr key={index} value={room} onClick={() => this.toggleModal(index, room)}>
                     <td> {room.name} </td>
                     <td> {room.description} </td>
                     <td>  {listEquip({room})} </td>
