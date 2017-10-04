@@ -12,9 +12,7 @@ render((
   <Router history={browserHistory}>
     <Route path="/" component={App}>
       <IndexRoute component={rooms} />
-        <Route path="calendar" component={Calendar}/>
       <Route path="*" component={NotFoundPage} />
     </Route>
   </Router>
 ), document.getElementById('root'));
-

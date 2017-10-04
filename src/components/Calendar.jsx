@@ -18,7 +18,7 @@ class Calendar extends React.Component{
         this.state = {
             startDate: moment(),
             selectedDate : moment(),
-            currentHour : 0,
+            selectedHour : 0,
             reserved : []
         };
         this.handleChange = this.handleChange.bind(this);
@@ -43,8 +43,8 @@ class Calendar extends React.Component{
 
     getIsReserved(dateTime) {
          return axios
-                .get('/getIsReserved/' + this.props.roomIndex + '/' + dateTime.format('X'))
-                .then(res => {console.log(res.data) ;return res.data;})
+                .get('http://localhost:3000/getIsReserved/' + this.props.roomIndex + '/' + dateTime.format('X'))
+                .then(res => {return res.data;})
                 .catch(err => console.log('get is reserved error : '  + err));
     }
 
@@ -54,7 +54,7 @@ class Calendar extends React.Component{
             headers: {'content-type': 'application/json'}
         };
         axios
-            .post('/setIsReserved', {
+            .post('http://localhost:3000/setIsReserved', {
                 roomIndex: this.props.roomIndex,
                 date: dateTime.format('X')
             }, config)
@@ -63,24 +63,30 @@ class Calendar extends React.Component{
     }
 
     setHour(hour) {
-        this.setState({currentHour: hour});
+        this.setState({selectedHour: hour});
     }
 
     makeReservation() {
-        this.setIsReserved(this.state.selectedDate.add(this.state.currentHour, 'h'));
+        this.setIsReserved(this.state.selectedDate.add(this.state.selectedHour, 'h'));
         this.props.onClose();
     }
 
     render() {
         let self = this;
         let thisStyle;
+        let thisHour = !!this.state.selectedHour;
+        let reservButton =
+            <button className={thisHour ? "btn btn-success" : "btn btn-success disabled"}
+                    onClick={thisHour ? (() => this.makeReservation()) : ('')}>
+                Confirmation
+            </button>
+        ;
         let listHours = hours.map(function(hour) {
             let day = self.state.selectedDate.startOf('day');
             let state = self.state.reserved[hour];
-            console.log(self.state.currentHour, hour);
             if (state == false) {
                 thisStyle = style.hCellFree;
-                if(self.state.currentHour == hour) {
+                if(self.state.selectedHour == hour) {
                     thisStyle = style.hCellSelected;
                 }
             } else {
@@ -112,13 +118,8 @@ class Calendar extends React.Component{
                     <span className="glyphicon glyphicon-arrow-down"> </span>
                     <div className={style.rowHours}>
                         {listHours}
-                        {console.log('PLOP2')}
                     </div>
-                    <span className="glyphicon glyphicon-arrow-down"> </span>
-                    <button
-                        className="btn btn-success"
-                        onClick={ () => this.makeReservation()}
-                    >Confirmation</button>
+                    {reservButton}
                 </div>
             </div>
         );
