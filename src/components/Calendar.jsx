@@ -8,7 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import 'react-datepicker/dist/react-datepicker-cssmodules.css';
 
 moment.locale('fr');
-const hours = [8, 10, 12, 14, 16, 18];
+const hours = [8, 10, 12, 14, 16, 22];
 
 
 class Calendar extends React.Component{
@@ -31,12 +31,15 @@ class Calendar extends React.Component{
     handleChange(date) {
         let self = this;
         let tmp = [];
-        this.setState({selectedDate: date});
+        this.setState({
+            startDate: date,
+            selectedDate: date
+        });
         hours.map(function(hour) {
-            let day = date.startOf('day');
+            let day = date.clone().startOf('day');
              self.getIsReserved(day.add(hour, 'h'))
                  .then(res => {tmp[hour] = (res); return tmp;})
-                 .then(tmp => self.setState({reserved: tmp}))
+                 .then(tmp => {self.setState({reserved: tmp})})
                  .catch(err => console.log('error handleChange : ', err));
     });
 }

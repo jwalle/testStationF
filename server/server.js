@@ -25,22 +25,24 @@ app.use(helmet.contentSecurityPolicy({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/getRooms', function (req, res) {
-    res.send(getRooms());
-});
 
-let myFilters = [];
+function simpleRooms() {
+        let result = null;
+        try {
+            result = JSON.parse(fs.readFileSync('./rooms.json', function (err, data) {
+                if (err) throw err;
+                return data;
+            }));
+        }
+        catch(e) {
+        }
+        return(result);
+}
 
 function getRooms() {
-    let result = null;
-    try {
-        result = JSON.parse(fs.readFileSync('./rooms.json', function (err, data) {
-            if (err) throw err;
-            return data;
-        }));
-    }
-    catch(e) { } //TODO
-    return result;
+    return new Promise( function (resolve, error) {
+        resolve(simpleRooms());
+    })
 }
 
 function compareRoomsASC(a, b) {
@@ -61,30 +63,29 @@ function compareRoomsDSC(a, b) {
 
 function sortRooms(rooms, sortDir) {
     if (sortDir === 'ASC') {
-        rooms.rooms.sort(compareRoomsASC);
-    } else {
-        rooms.rooms.sort(compareRoomsDSC);
+        rooms.sort(compareRoomsASC);
+    } else if (sortDir === 'DSC') {
+        rooms.sort(compareRoomsDSC);
     }
     return rooms;
 }
 
-function addFilter(filter)
-{
-    myFilters.indexOf(filter) === -1 ? myFilters.push(filter) : null;
-}
-
-function removeFilter(filter) {
-    myFilters = myFilters.filter(entry => entry != filter);
-}
-
-function filterEquip(filterEquip) {
-    let rooms = getRooms();
-
-    return rooms.rooms.filter(function (a) {
-        let res = a.equipements.map(b => {
-            return (filterEquip.indexOf(b.name) > -1);
+function hasThisEquip(filters, equips){
+    let count = 0;
+    if (filters.length === 0)
+        return 1;
+    equips.map( a => {
+        filters.map(b => {
+            if (a.name === b)
+                count = count + 1;
         });
-        return res.indexOf(true) > -1;
+    });
+    return (count > 0);
+}
+
+function filterEquip(rooms, filters) {
+    return rooms.rooms.filter(function (a) {
+        return hasThisEquip(filters, a.equipements);
     });
 }
 
@@ -103,47 +104,36 @@ function getReservation() {
 }
 
 function isReserved(roomIndex, time) {
-    let rooms = getRooms();
     let rsvts = getReservation();
-    let cTime = moment().format('X');
-    if (time < cTime)
-        return ('true');
-    if (rooms.rooms[roomIndex]) {
+    if (time < moment().format('X'))
+        return (true);
+    if (simpleRooms().rooms[roomIndex]) {
         for (let key in rsvts) {
             if (rsvts.hasOwnProperty(key)) {
                 let val = rsvts[key];
                 if (val.roomIndex == roomIndex) {
                     if (val.time == time) {
-                        return('true');
+                        return true;
                     }
                 }
             }
         }
     }
-    return('false');
+    return(false);
 }
 
-app.get('/addFilter/:filter', function (req, res) {
-    addFilter(req.params.filter);
-    res.send(getRooms());
-});
-
-app.get('/removeFilter/:filter', function (req, res) {
-    removeFilter(req.params.filter);
-    res.send(getRooms());
-});
-
-app.get('/getFilters', function (req, res) {
-    res.send(myFilters);
-});
-
-app.post('/filterRooms', function (req, res) {
-    res.send(filterEquip(req.body.filteredEquip));
-});
-
-app.get('/sortRooms/:sortDir', function (req, res) {
-    let rooms = getRooms();
-    res.send(sortRooms(rooms, req.params.sortDir));
+app.post('/getRooms', function (req, res) {
+    getRooms()
+        .then(response => {
+            return filterEquip(response, req.body.filters)
+        })
+        .then(response => {
+            return sortRooms(response, req.body.sortDir)
+        })
+        .then(response => {
+            res.send(response)
+        })
+        .catch(error => console.log(error));
 });
 
 app.get('/getIsReserved/:roomIndex/:date', function (req, res) {
@@ -153,8 +143,9 @@ app.get('/getIsReserved/:roomIndex/:date', function (req, res) {
 });
 
 app.post('/setIsReserved', function (req, res) {
-    if (isReserved(req.body.roomIndex, req.body.date) == 'true')
+    if (isReserved(req.body.roomIndex, req.body.date) === true)
         return ;
+
     fs.readFile('database/reservation.json', 'utf8', function (err, data) {
         if (err) throw err;
         let obj;

@@ -23,11 +23,11 @@ class ContentPage extends React.Component {
         this.getRooms = this.getRooms.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
         this.removeFilter = this.removeFilter.bind(this);
+        this.addFilter = this.addFilter.bind(this);
     }
 
     componentWillMount() {
         this.getRooms();
-        this.getFilters();
     }
 
     reserveSortDir(sortDir) {
@@ -43,79 +43,66 @@ class ContentPage extends React.Component {
     }
 
     getRooms() {
+        let config = {
+            withCredentials: true,
+            headers: {'content-type': 'application/json'}
+        };
         let self = this;
         axios
-            .get('/getRooms')
-            .then(res => self.setState({
-                rooms : res.data.rooms
-            }))
+            .post('/getRooms', {
+                filters: self.state.filters,
+                sortDir : self.state.sortDir
+            },config)
+            .then(res => {self.setState({
+                rooms : res.data
+            })})
             .catch(err => console.log('getRooms error : ' + err));
     }
 
     removeFilter(filter) {
-        let self = this;
-        axios
-            .get('/removeFilter/' + filter)
-            .then(res => self.setState({
-                rooms : res.data.rooms
-            }))
-            .catch(err => console.log('removeFilter error : ' + err));
-    }
-
-    getFilters() {
-        let self = this;
-        axios
-            .get('/getFilters')
-            .then(res => {console.log(res); self.setState({
-                filters : res.data
-            })})
-            .catch(err => console.log('getFilter error : ' + err));
+        let myFilters = this.state.filters;
+        this.setState({
+            filters : myFilters.filter(entry => entry !== filter
+            )}, this.getRooms);
+        this.forceUpdate();
     }
 
     addFilter(filter) {
-        let self = this;
-        axios
-            .get('/addFilter/' + filter)
-            .then(res => self.setState({
-                rooms : res.data.rooms
-            }))
-            .catch(err => console.log('addFilter error : ' + err));
+        let myFilters = this.state.filters;
+        myFilters.indexOf(filter) === -1 ? myFilters.push(filter) : null;
+        this.setState({
+            filters : myFilters
+              }, this.getRooms());
     }
 
     sortRooms() {
-        let self = this;
         let sortDir = '';
         if (!this.state.sortDir) {
             sortDir = 'ASC';
         } else {
             sortDir = this.reserveSortDir(this.state.sortDir);
         }
-        axios
-            .get('/sortRooms/' + sortDir)
-            .then(res => self.setState({
-                rooms : res.data.rooms
-            }))
-            .catch(err => console.log('sortRooms error : ' + err));
-        this.setState({sortDir: sortDir});
+        this.setState({sortDir: sortDir}, this.getRooms());
+        this.forceUpdate();
     }
 
     render() {
-        let self = this;
         let listEquip = ({room}) => room.equipements.map(function (equip, index) {
            return (<span
                className="equip btn btn-primary"
                key={index}
-               onClick={(e) => {self.addFilter(equip.name); e.stopPropagation();}}>
+               onClick={(e) => {this.addFilter(equip.name); e.stopPropagation();}}>
                {equip.name}
                     </span>)
-        });
+        }.bind(this));
+
         let listFilters = this.state.filters.map(function (filter, index) {
             return (
-                <button className="btn btn-info" key={index} onClick={() => self.removeFilter(filter)}>
+                <button className="btn btn-info" key={index} onClick={() => this.removeFilter(filter)}>
                     {filter}
                 </button>
             )
-        });
+        }.bind(this));
 
         let listRooms = this.state.rooms.map(function (room, index) {
             return (
@@ -127,6 +114,7 @@ class ContentPage extends React.Component {
                 </tr>
             );}.bind(this)
         );
+
         let sortDir = this.state.sortDir;
         return (
             <div className="container">
