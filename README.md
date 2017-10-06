@@ -4,6 +4,20 @@ Le but de ce test est de mettre en place une single page App permettant la reser
 
 J'ai utilisé un backend Node.js/express et un frontend en React.js.
 
+### Pour lancer le projet
+ 
+```
+./start.sh
+```
+
+#### L'application se lancera sur :
+
+
+<http://localhost:3000>
+
+
+ou si vous preferez build le projet vous même :
+
 #### Pour installer les dépendances:
 
 ```
@@ -23,8 +37,3 @@ npm run build
 ```
 npm start
 ```
-
-#### L'application se lance sur :
-
-
-<http://localhost:3000>
