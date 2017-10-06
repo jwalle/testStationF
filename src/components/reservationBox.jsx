@@ -12,8 +12,7 @@ class ReservationBox extends React.Component{
         return (
 
             <div>
-                <div className={style.backdropStyle}></div>
-
+                <div className={style.backdropStyle}/>
                 <div className={style.modalStyle}>
                     <div className={style.dialogStyle}>
                         <div className={style.modalContent}>

@@ -98,7 +98,10 @@ class ContentPage extends React.Component {
 
         let listFilters = this.state.filters.map(function (filter, index) {
             return (
-                <button className="btn btn-info" key={index} onClick={() => this.removeFilter(filter)}>
+                <button className="btn btn-info"
+                        key={index}
+                        style={{marginLeft:15}}
+                        onClick={() => this.removeFilter(filter)}>
                     {filter}
                 </button>
             )
@@ -120,8 +123,8 @@ class ContentPage extends React.Component {
             <div className="container">
                 <div className="row">
                         <div className="">
-                            <button className="btn" onClick={() => this.sortRooms()}>
-                                Triez par place
+                            <button className="btn" style={{float:'right'}} onClick={() => this.sortRooms()}>
+                                Trier par place
                             </button>
                             {listFilters}
                         <table className="table table-hover table-striped">

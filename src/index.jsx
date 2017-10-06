@@ -6,7 +6,6 @@ import App from './components/App.jsx';
 
 import NotFoundPage from './components/NotFoundPage.jsx';
 import rooms from './components/ContentPage.jsx';
-import Calendar from './components/Calendar.jsx'
 
 render((
   <Router history={browserHistory}>

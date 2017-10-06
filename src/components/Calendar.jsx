@@ -8,8 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import 'react-datepicker/dist/react-datepicker-cssmodules.css';
 
 moment.locale('fr');
-const hours = [8, 10, 12, 14, 16, 22];
-
+const hours = [8, 10, 12, 14, 16, 18];
 
 class Calendar extends React.Component{
     constructor(props) {
@@ -76,14 +75,16 @@ class Calendar extends React.Component{
 
     render() {
         let self = this;
-        let thisStyle;
+        let thisStyle = null;
         let thisHour = !!this.state.selectedHour;
+
         let reservButton =
             <button className={thisHour ? "btn btn-success" : "btn btn-success disabled"}
                     onClick={thisHour ? (() => this.makeReservation()) : ('')}>
                 Confirmation
             </button>
         ;
+
         let listHours = hours.map(function(hour) {
             let day = self.state.selectedDate.startOf('day');
             let state = self.state.reserved[hour];
