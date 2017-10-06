@@ -15,18 +15,22 @@ class ContentPage extends React.Component {
             rooms : [],
             room : '',
             roomIndex: 0,
-            user : 'julien',
+            user : '',
             isOpen: false,
             sortDir: '',
-            filters: []
+            filters: [],
+            token: '',
+            expire: null
         };
         this.getRooms = this.getRooms.bind(this);
+        this.getLogin = this.getLogin.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
         this.removeFilter = this.removeFilter.bind(this);
         this.addFilter = this.addFilter.bind(this);
     }
 
     componentWillMount() {
+        this.getLogin();
         this.getRooms();
     }
 
@@ -42,10 +46,24 @@ class ContentPage extends React.Component {
         });
     }
 
+    getLogin() {
+        return axios
+            .get('http://localhost:3000/getLogin')
+            .then(res => this.setState({
+                user: res.data.user,
+                token: res.data.token,
+                expire: res.data.expire
+            }))
+            .catch(err => console.log('getLogin error : '  + err));
+    }
+
     getRooms() {
         let config = {
             withCredentials: true,
-            headers: {'content-type': 'application/json'}
+            headers: {
+                'content-type': 'application/json',
+                'x-access-token' : this.state.token
+            }
         };
         let self = this;
         axios
@@ -87,42 +105,56 @@ class ContentPage extends React.Component {
     }
 
     render() {
-        let listEquip = ({room}) => room.equipements.map(function (equip, index) {
-           return (<span
-               className="equip btn btn-primary"
-               key={index}
-               onClick={(e) => {this.addFilter(equip.name); e.stopPropagation();}}>
+        try {
+            var listEquip = ({room}) => room.equipements.map(function (equip, index) {
+                return (<span
+                    className="equip btn btn-primary"
+                    key={index}
+                    onClick={(e) => {
+                        this.addFilter(equip.name);
+                        e.stopPropagation();
+                    }}>
                {equip.name}
                     </span>)
-        }.bind(this));
+            }.bind(this));
 
-        let listFilters = this.state.filters.map(function (filter, index) {
-            return (
-                <button className="btn btn-info"
-                        key={index}
-                        style={{marginLeft:15}}
-                        onClick={() => this.removeFilter(filter)}>
-                    {filter}
-                </button>
-            )
-        }.bind(this));
+            var listFilters = this.state.filters.map(function (filter, index) {
+                return (
+                    <button className="btn btn-info"
+                            key={index}
+                            style={{marginLeft: 15}}
+                            onClick={() => this.removeFilter(filter)}>
+                        {filter}
+                    </button>
+                )
+            }.bind(this));
 
-        let listRooms = this.state.rooms.map(function (room, index) {
-            return (
-                <tr key={index} value={room} onClick={() => { this.toggleModal(index, room);}}>
-                    <td> {room.name} </td>
-                    <td> {room.description} </td>
-                    <td>  {listEquip({room})} </td>
-                    <td>  {room.capacity} </td>
-                </tr>
-            );}.bind(this)
-        );
+            var listRooms = this.state.rooms.map(function (room, index) {
+                    return (
+                        <tr key={index} value={room} onClick={() => {
+                            this.toggleModal(index, room);
+                        }}>
+                            <td> {room.name} </td>
+                            <td> {room.description} </td>
+                            <td>  {listEquip({room})} </td>
+                            <td>  {room.capacity} </td>
+                        </tr>
+                    );
+                }.bind(this)
+            );
+        }
+        catch (e) {
+            // console.log('error in rendering :');
+        }
 
         let sortDir = this.state.sortDir;
         return (
             <div className="container">
                 <div className="row">
                         <div className="">
+                            <button className="btn" style={{float:'left'}} onClick={() => this.getLogin()}>
+                                Login
+                            </button>
                             <button className="btn" style={{float:'right'}} onClick={() => this.sortRooms()}>
                                 Trier par place
                             </button>

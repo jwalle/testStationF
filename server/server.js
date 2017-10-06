@@ -7,6 +7,9 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const helmet = require('helmet');
+const jwt = require('jwt-simple');
+
+let jwtauth = require('./jwtauth');
 
 /* eslint-disable no-console */
 
@@ -22,20 +25,20 @@ app.use(helmet.contentSecurityPolicy({
     }
 }));
 
+app.set('jwtTokenSecret', 'very-secret-value');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 function simpleRooms() {
-        let result = null;
+    let result = null;
         try {
             result = JSON.parse(fs.readFileSync('./rooms.json', function (err, data) {
                 if (err) throw err;
                 return data;
             }));
         }
-        catch(e) {
-        }
+        catch(e) {}
         return(result);
 }
 
@@ -122,7 +125,7 @@ function isReserved(roomIndex, time) {
     return(false);
 }
 
-app.post('/getRooms', function (req, res) {
+app.post('/getRooms', bodyParser.json(), jwtauth, function (req, res) {
     getRooms()
         .then(response => {
             return filterEquip(response, req.body.filters)
@@ -136,13 +139,14 @@ app.post('/getRooms', function (req, res) {
         .catch(error => console.log(error));
 });
 
-app.get('/getIsReserved/:roomIndex/:date', function (req, res) {
+app.get('/getIsReserved/:roomIndex/:date', bodyParser.json(), jwtauth, function (req, res) {
     let roomIndex = req.params.roomIndex;
     let time = req.params.date;
     res.send(isReserved(roomIndex, time));
 });
 
-app.post('/setIsReserved', function (req, res) {
+
+app.post('/setIsReserved', bodyParser.json(), jwtauth, function (req, res) {
     if (isReserved(req.body.roomIndex, req.body.date) === true)
         return ;
 
@@ -165,20 +169,22 @@ app.post('/setIsReserved', function (req, res) {
         res.send('true');
     });
 });
-    // let options = {
-    //   url: 'http://online.stationf.co/tests/rooms.json',
-    //   json: true
-    // };
-    // request.get(options, function (error, response, body) {
-    //     if (!error /* && response.statusCode === 200*/) {
-    //         res.send(body);
-    //     }
-    //     else
-    //         console.log('request error :', error)
-    //
-    //});
 
-
+app.get('/getLogin', function (req, res) {
+    let expires = moment().add(7, 'days').valueOf();
+    let token = jwt.encode(
+        {
+            iss: 'jwalle',
+            exp: expires
+        },
+        app.get('jwtTokenSecret')
+    );
+    res.json({
+        token : token,
+        expires : expires,
+        user : 'jwalle'
+    });
+});
 
 
 app.get('*', function (req, res) {

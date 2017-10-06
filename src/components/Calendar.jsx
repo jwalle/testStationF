@@ -44,23 +44,31 @@ class Calendar extends React.Component{
 }
 
     getIsReserved(dateTime) {
-         return axios
-                .get('http://localhost:3000/getIsReserved/' + this.props.roomIndex + '/' + dateTime.format('X'))
-                .then(res => {return res.data;})
-                .catch(err => console.log('get is reserved error : '  + err));
+        let config = {
+            headers: {
+                'content-type': 'application/json',
+                'x-access-token': this.state.token
+            }
+        };
+        return axios
+            .get('http://localhost:3000/getIsReserved/' + this.props.roomIndex + '/' + dateTime.format('X'), config)
+            .then(res => {return res.data;})
+            .catch(err => console.log('get is reserved error : '  + err));
     }
 
     setIsReserved(dateTime) {
         let config = {
             withCredentials: true,
-            headers: {'content-type': 'application/json'}
-        };
+            headers: {  'content-type': 'application/json',
+                        'x-access-token': this.state.token
+                    }
+            };
         axios
             .post('http://localhost:3000/setIsReserved', {
                 roomIndex: this.props.roomIndex,
                 date: dateTime.format('X')
             }, config)
-            .then(res => console.log('success !' + res))
+            .then(res => console.log('Votre salle est reservée !'))
             .catch(err => console.log('set reserved error : '  + err));
     }
 
